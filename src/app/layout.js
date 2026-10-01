@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "NIFASE - National Institute of Finance and Stock Education",
   description: "National Institute of Finance and Stock Education (NIFASE) provides job-oriented financial, stock market, derivatives, and technical analysis courses.",
+  metadataBase: new URL("https://www.niface.com"),
 };
 
 export default function RootLayout({ children }) {

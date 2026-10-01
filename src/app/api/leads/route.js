@@ -5,6 +5,10 @@ import { getClientIp } from "@/lib/request-info";
 const LEAD_WINDOW_MS = 60_000;
 const LEAD_ATTEMPT_LIMIT = 20;
 
+const CRM_URL = process.env.CRM_LEADS_URL || "https://leads.dizitaladda.com/api/public/leads";
+const DEFAULT_SOURCE = process.env.CRM_SOURCE || "main website";
+const DEFAULT_DOMAIN = process.env.CRM_DOMAIN || "nifase";
+
 const toText = (value) => {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value;
@@ -32,14 +36,6 @@ export async function POST(request) {
     return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
   }
 
-  const scriptUrl = process.env.GOOGLE_SHEETS_WEBAPP_URL;
-  if (!scriptUrl) {
-    return NextResponse.json(
-      { error: "Google Sheets integration is not configured (missing GOOGLE_SHEETS_WEBAPP_URL)." },
-      { status: 500 },
-    );
-  }
-
   let body;
   try {
     body = await request.json();
@@ -47,102 +43,66 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const form = trimOrEmpty(body?.form || body?.source);
-  if (!form) {
-    return NextResponse.json({ error: "Missing required field: form" }, { status: 400 });
+  const name = trimOrEmpty(body?.name);
+  const email = trimOrEmpty(body?.email);
+  const phone = trimOrEmpty(body?.phone || body?.phoneRaw);
+
+  if (!name && !email && !phone) {
+    return NextResponse.json({ error: "Missing required contact fields" }, { status: 400 });
   }
 
-  const key = process.env.GOOGLE_SHEETS_WEBAPP_KEY || "";
-
   const payload = {
-    ...body,
-    form,
+    name,
+    email,
+    phone,
+    source: DEFAULT_SOURCE,
+    domain: DEFAULT_DOMAIN,
+    course: trimOrEmpty(body?.course),
+    message: trimOrEmpty(body?.message || body?.subject),
+    subject: trimOrEmpty(body?.subject),
+    form: trimOrEmpty(body?.form || "lead-form"),
+    contextTitle: trimOrEmpty(body?.contextTitle),
+    pageUrl: trimOrEmpty(body?.pageUrl),
     submittedAt: new Date().toISOString(),
     ip,
     userAgent: truncate(request.headers.get("user-agent") || ""),
     referer: truncate(request.headers.get("referer") || ""),
-    key: key ? key : undefined,
   };
 
-  for (const [k, v] of Object.entries(payload)) {
-    if (typeof v === "string") {
-      payload[k] = truncate(v);
-    }
-  }
-
   try {
-    const upstream = await fetch(scriptUrl, {
+    const upstream = await fetch(CRM_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
       cache: "no-store",
     });
 
-    const contentType = upstream.headers.get("content-type") || "";
     const text = await upstream.text();
-
-    const looksLikeHtml = contentType.includes("text/html") || /^\s*</.test(text);
-    const looksLikeGoogleLogin = /accounts\.google\.com\/(text|signin)|google\.com\/v3\/signin|Sign in/i.test(text);
-    const looksLikeDriveError = /unable to open the file at present|Page not found/i.test(text);
-
-    const isProd = process.env.NODE_ENV === "production";
-    const devDiagnostics = !isProd
-      ? {
-          upstreamStatus: upstream.status,
-          upstreamContentType: contentType,
-          upstreamBodyPreview: text.slice(0, 240),
-        }
-      : undefined;
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      // Non-JSON response
+    }
 
     if (!upstream.ok) {
-      console.error("POST /api/leads: Apps Script error", upstream.status, text);
-
-      if (looksLikeHtml || looksLikeGoogleLogin || looksLikeDriveError) {
-        return NextResponse.json(
-          {
-            error:
-              "Google Apps Script Web App is not publicly accessible. Re-deploy it as a Web app with access set to 'Anyone' and use the /exec URL.",
-            ...devDiagnostics,
-          },
-          { status: 502 },
-        );
-      }
-
+      console.error("POST /api/leads: CRM endpoint error", upstream.status, text);
       return NextResponse.json(
-        {
-          error: "Unable to record lead",
-          ...devDiagnostics,
-        },
-        { status: 502 },
+        { error: json?.message || json?.error || "Unable to record lead in CRM" },
+        { status: upstream.status >= 400 && upstream.status < 500 ? upstream.status : 502 }
       );
     }
 
-    if (looksLikeHtml || looksLikeGoogleLogin || looksLikeDriveError) {
-      console.error("POST /api/leads: received HTML from Apps Script", { contentType });
-      return NextResponse.json(
-        {
-          error:
-            "Google Apps Script Web App returned an HTML page (likely auth redirect). Re-deploy it as a Web app with access set to 'Anyone' and use the /exec URL.",
-          ...devDiagnostics,
-        },
-        { status: 502 },
-      );
+    if (json && json.success === false) {
+      return NextResponse.json({ error: json.error || json.message || "Unable to record lead" }, { status: 502 });
     }
 
-    try {
-      const json = JSON.parse(text);
-      if (json && json.ok === false) {
-        return NextResponse.json({ error: json.error || "Unable to record lead" }, { status: 502 });
-      }
-    } catch {
-      // Apps Script may return plain text; treat as success if upstream OK.
-    }
-
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, success: true });
   } catch (error) {
-    console.error("POST /api/leads failed", error);
-    return NextResponse.json({ error: "Unable to reach Google Sheets endpoint" }, { status: 502 });
+    console.error("POST /api/leads failed to reach CRM", error);
+    return NextResponse.json({ error: "Unable to connect to CRM endpoint" }, { status: 502 });
   }
 }
