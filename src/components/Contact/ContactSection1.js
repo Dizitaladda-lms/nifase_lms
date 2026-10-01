@@ -557,7 +557,7 @@ const ContactSection1 = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://wa.me/915551234567"
+                  href="https://wa.me/918743912102"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.socialLink}

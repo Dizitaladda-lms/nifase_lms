@@ -82,7 +82,7 @@ export default function FixedFooterReveal({ children }) {
                       />
                     </svg>
                   </a>
-                  <a className={styles.iconLink} href="https://www.instagram.com/nifase.official?igsh=ZTJkb2R1aHZ3b3Vn" aria-label="Instagram" target=" ">
+                  <a className={styles.iconLink} href="https://www.instagram.com/nifase.official?igsh=ZTJkb2R1aHZ3b3Vn" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -90,7 +90,7 @@ export default function FixedFooterReveal({ children }) {
                       />
                     </svg>
                   </a>
-                  <a className={styles.iconLink} href="https://www.youtube.com/@nifase.official" aria-label="YouTube" target=" ">
+                  <a className={styles.iconLink} href="https://www.youtube.com/@nifase.official" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -98,7 +98,7 @@ export default function FixedFooterReveal({ children }) {
                       />
                     </svg>
                   </a>
-                  <a className={styles.iconLink} href="https://www.facebook.com/profile.php?id=61586810825429" aria-label="Facebook" target=" ">
+                  <a className={styles.iconLink} href="https://www.facebook.com/profile.php?id=61586810825429" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                       <path
                         fill="currentColor"
@@ -146,24 +146,24 @@ export default function FixedFooterReveal({ children }) {
               <div className={styles.linkColumn}>
                 <h3 className={styles.columnTitle}>Courses</h3>
                 <nav className={styles.columnLinks}>
-                  <a className={styles.columnLink} href="/courses/stock-market-basics">
-                    Stock Market Basics
-                  </a>
-                  <a className={styles.columnLink} href="/courses/technical-analysis">
+                  <Link className={styles.columnLink} href="/courses/certificate-in-stock-markets">
+                    Certificate in Stock Markets
+                  </Link>
+                  <Link className={styles.columnLink} href="/courses/adfmm">
+                    Advance Diploma (ADFMM)
+                  </Link>
+                  <Link className={styles.columnLink} href="/courses/technical-course-for-professional-traders">
                     Technical Analysis
-                  </a>
-                  <a className={styles.columnLink} href="/courses/fundamental-analysis">
+                  </Link>
+                  <Link className={styles.columnLink} href="/courses/fundamental-course-for-traders">
                     Fundamental Analysis
-                  </a>
-                  <a className={styles.columnLink} href="/courses/options-trading">
+                  </Link>
+                  <Link className={styles.columnLink} href="/courses/option-strategies-course">
                     Options Trading
-                  </a>
-                  <a className={styles.columnLink} href="/courses/portfolio-management">
+                  </Link>
+                  <Link className={styles.columnLink} href="/courses/investment-analyst-portfolio-management-program">
                     Portfolio Management
-                  </a>
-                  <a className={styles.columnLink} href="/courses/risk-management">
-                    Risk Management
-                  </a>
+                  </Link>
                 </nav>
               </div>
             </div>
