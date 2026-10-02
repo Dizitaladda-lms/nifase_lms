@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './header.module.css';
 import CoursePopupForm from "@/components/CoursePopupForm";
+import CountrySelector from "./CountrySelector";
 
 const MenuToggleIcon = ({ open }) => {
   return (
@@ -131,8 +132,9 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth Buttons & Country Selector */}
           <div className={styles.desktopAuth}>
+            <CountrySelector />
             <a href="/contact-us" className={styles.signInBtn}>
               Contact
             </a>
@@ -159,10 +161,11 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className={styles.mobileMenu}>
           <div className={styles.mobileMenuContent}>
-            {/* Mobile Auth Buttons */}
+            {/* Mobile Auth Buttons & Country Selector */}
             <div className={styles.mobileAuthButtons}>
+              <CountrySelector />
               <a href="/contact-us" className={styles.mobileSignInBtn}>
-                contact
+                Contact
               </a>
               <button
                 type="button"

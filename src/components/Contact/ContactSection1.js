@@ -17,6 +17,7 @@ const ContactSection1 = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
   });
@@ -42,6 +43,7 @@ const ContactSection1 = () => {
           form: "contact-us",
           name: formData.name,
           email: formData.email,
+          phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
           pageUrl: typeof window !== "undefined" ? window.location.href : "",
@@ -56,7 +58,7 @@ const ContactSection1 = () => {
       }
 
       window.alert("Message sent. We'll get back to you soon.");
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } finally {
       setSubmitting(false);
     }
@@ -331,6 +333,21 @@ const ContactSection1 = () => {
                   className={styles.input}
                   placeholder="john@example.com"
                   required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="phone" className={styles.label}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={styles.input}
+                  placeholder="+91 9876543210"
                 />
               </div>
 
